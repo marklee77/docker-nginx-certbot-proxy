@@ -1,0 +1,1 @@
+mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge
