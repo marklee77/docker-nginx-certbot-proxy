@@ -2,3 +2,32 @@
 
 mkdir -m 0755 -p /run/nginx
 chown -R nginx:nginx /run/nginx
+
+if ! [ -f /etc/ssl/nginx/dh4096.pem ]; then
+    openssl dhparam -out /etc/ssl/nginx/dh4096.pem 4096
+fi
+
+umask 0022
+
+cat > /etc/nginx/conf.d/default.conf <<EOF
+server {
+  listen 80 default;
+  root /var/www/default/htdocs;
+  location /.well-known {
+  }
+  location / {
+    return 301 https://\$host\$request_uri;
+  }
+}
+
+server {
+  listen 443 ssl default;
+  $(
+    if [ -n "$nginx_default_redirect"]; then
+      echo "  return 301 https://$nginx_default_redirect;"
+    else
+      echo "  return 501;"
+    fi
+  )
+}
+EOF
