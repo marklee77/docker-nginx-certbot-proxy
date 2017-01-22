@@ -1,0 +1,4 @@
+#!/bin/sh
+
+mkdir -m 0755 -p /run/nginx
+chown -R nginx:nginx /run/nginx
