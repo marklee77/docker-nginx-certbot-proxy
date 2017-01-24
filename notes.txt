@@ -1,7 +1,4 @@
-mkdir -p /tmp/certbot/public_html/.well-known/acme-challenge
-
-default ssl settings
-non-ssl redirects to https, EXCEPT .well-known/acme-challenge
-https .well-known/acme-challenge also works
+default proxy settings?
+probably want default proxy?
 
 volume for error pages
