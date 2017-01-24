@@ -5,5 +5,6 @@ public key pinning and letsencrypt?
 
 https://www.nginx.com/blog/nginx-caching-guide/
 
-default proxy settings?
+proxy_redirect default; should be after proxy_pass
+
 volume for error pages
