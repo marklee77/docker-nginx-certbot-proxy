@@ -19,7 +19,7 @@ server {
 
   add_header X-Content-Type-Options nosniff;
   add_header X-Frame-Options sameorigin;
-  add_header X-Permitted-Cross-Domain-Policies: none
+  add_header X-Permitted-Cross-Domain-Policies none;
   add_header X-XSS-Protection "1; mode=block";
 
   root /var/www/default/htdocs;
@@ -44,7 +44,7 @@ server {
   )
   add_header X-Content-Type-Options nosniff;
   add_header X-Frame-Options sameorigin;
-  add_header X-Permitted-Cross-Domain-Policies: none
+  add_header X-Permitted-Cross-Domain-Policies none;
   add_header X-XSS-Protection "1; mode=block";
 
   root /var/www/default/htdocs;
@@ -56,4 +56,5 @@ server {
       fi
     )
   }
+}
 EOF
