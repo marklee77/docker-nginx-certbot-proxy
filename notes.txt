@@ -1,19 +1,33 @@
+- need volume for dhparam and proper permissions
+- default is the same as any host, but w/ default on listen line
+- work on script to manipulate proxies
+  -- add
+    1. create no-https config (501 except for acme)
+    2. restart nginx? or can it load w/out restart?
+    3. letsencrypt
+    4. new config w/ https
+    5. re-start/reload
+  -- delete
+    1. delete
+    2. restart
+  -- disable
+    - use sites-available / sites-enabled idiom
+  -- set default
+    - need to unset default in others (sed?)
+    - reload
+
+- daily cron job to renew
+- use snippets for common settings/headers
+- ocsp staping
+- public key pinning and letsencrypt?
+- volume for error pages
+- proxy_redirect after proxy pass?
+
 https://www.owasp.org/index.php/List_of_useful_HTTP_headers#tab=Headers
 
-ocsp staping
-public key pinning and letsencrypt?
-
 https://www.nginx.com/blog/nginx-caching-guide/
-
-proxy_redirect default; should be after proxy_pass
-
-use snippets for common settings/headers
-
-volume for error pages
 
 letsencrypt certonly --agree-tos --webroot -d $domainname -w /var/www/$domainname/htdocs --email $email
 
 ssl_certificate /etc/letsencrypt/live/$domainname/fullchain.pem
 ssl_certificate_key /etc/letsencrypt/live/$domainname/privkey.pem
-
-letsencrypt renew daily
