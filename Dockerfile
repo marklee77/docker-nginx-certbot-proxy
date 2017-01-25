@@ -16,6 +16,6 @@ RUN chmod 0644 /etc/nginx/nginx.conf
 COPY root/etc/my_init.d/10-nginx-setup /etc/my_init.d/
 RUN chmod 0755 /etc/my_init.d/10-nginx-setup
 
-VOLUME ["/var/log/nginx", "/var/www"]
+VOLUME ["/etc/letsencrypt", "/var/log/nginx", "/var/www"]
 
 EXPOSE 80 443

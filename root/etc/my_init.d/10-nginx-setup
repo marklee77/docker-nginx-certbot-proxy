@@ -1,6 +1,6 @@
 #!/bin/sh
 
-: ${nginx_hsts_max_age:=0}
+: ${nginx_default_hsts_max_age:=0}
 
 mkdir -m 0755 -p /run/nginx
 chown -R nginx:nginx /run/nginx
@@ -35,17 +35,18 @@ server {
 server {
   listen 443 ssl default;
 
-  $(
-    if [ "$nginx_hsts_max_age" -gt 0 ]; then
-      echo -n "add_header Strict-Transport-Security \""
-      echo -n "max-age=$nginx_hsts_max_age; "
-      echo "includeSubDomains\" always;"
-    fi
-  )
   add_header X-Content-Type-Options nosniff;
   add_header X-Frame-Options sameorigin;
   add_header X-Permitted-Cross-Domain-Policies none;
   add_header X-XSS-Protection "1; mode=block";
+
+  $(
+    if [ "$nginx_default_hsts_max_age" -gt 0 ]; then
+      echo -n "add_header Strict-Transport-Security \""
+      echo -n "max-age=$nginx_default_hsts_max_age; "
+      echo "includeSubDomains\" always;"
+    fi
+  )
 
   root /var/www/default/htdocs;
 
@@ -53,6 +54,8 @@ server {
     $(
       if [ -n "$nginx_default_redirect" ]; then
         echo "return 301 $nginx_default_redirect;"
+      else [ -n "$nginx_default_proxy" ]; then
+        echo "proxy_pass $nginx_default_proxy;"
       fi
     )
   }

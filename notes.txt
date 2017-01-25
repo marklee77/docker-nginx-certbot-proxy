@@ -7,4 +7,13 @@ https://www.nginx.com/blog/nginx-caching-guide/
 
 proxy_redirect default; should be after proxy_pass
 
+use snippets for common settings/headers
+
 volume for error pages
+
+letsencrypt certonly --agree-tos --webroot -d $domainname -w /var/www/$domainname/htdocs --email $email
+
+ssl_certificate /etc/letsencrypt/live/$domainname/fullchain.pem
+ssl_certificate_key /etc/letsencrypt/live/$domainname/privkey.pem
+
+letsencrypt renew daily
