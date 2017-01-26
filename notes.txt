@@ -17,7 +17,6 @@
     - reload
 
 - daily cron job to renew
-- use snippets for common settings/headers
 - ocsp staping
 - public key pinning and letsencrypt?
 - volume for error pages
