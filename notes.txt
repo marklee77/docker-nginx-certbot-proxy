@@ -18,16 +18,10 @@
     - reload
 
 - daily cron job to renew
-- ocsp staping
-- public key pinning and letsencrypt?
 - volume for error pages
-- proxy_redirect after proxy pass?
+- support hsts / preload and hpkp
 
-https://www.owasp.org/index.php/List_of_useful_HTTP_headers#tab=Headers
+letsencrypt certonly --agree-tos --rsa-key-size 4096 --email webmaster@stillwell.me --webroot -d $domainname -w /var/www/$domainname/htdocs
 
-https://www.nginx.com/blog/nginx-caching-guide/
+http://letsencrypt.readthedocs.io/en/latest/using.html#certbot-command-line-options
 
-letsencrypt certonly --agree-tos --webroot -d $domainname -w /var/www/$domainname/htdocs --email $email
-
-ssl_certificate /etc/letsencrypt/live/$domainname/fullchain.pem
-ssl_certificate_key /etc/letsencrypt/live/$domainname/privkey.pem

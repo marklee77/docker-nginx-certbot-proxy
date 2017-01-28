@@ -11,33 +11,38 @@ fi
 
 umask 0022
 
-mkdir -p /var/www/default/htdocs
+cat > /etc/nginx/snippets/resolver <<EOF
+resolver $(sed -n '/^nameserver /s///p' /etc/resolv.conf);
+EOF
 
-cat > /etc/nginx/sites/default <<EOF
+mkdir -p /var/www/$nginx_default_server_name/htdocs
+
+cat > /etc/nginx/sites/$nginx_default_server_name <<EOF
 server {
   listen 80 default_server;
   listen [::]:80 default_server;
+  server_name $nginx_default_server_name;
 
   include snippets/headers;
 
-  root /var/www/default/htdocs;
-
   location /.well-known {
+    root /var/www/$nginx_default_server_name/htdocs;
   }
 
   location / {
-    return 301 https://\$host\$request_uri;
+    return 301 https://\$server_name\$request_uri;
   }
 }
 
 server {
-  listen 443 default_server ssl http2;
-  listen [::]:443 default_server ssl http2;
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  server_name $nginx_default_server_name;
+
+  ssl_certificate /etc/letsencrypt/live/$nginx_default_server_name/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/$nginx_default_server_name/privkey.pem;
 
   include snippets/headers;
-
-  #ssl_certificate /etc/letsencrypt/live/default/fullchain.pem;
-  #ssl_certificate_key /etc/letsencrypt/live/default/privkey.pem;
 
   $(
     if [ "$nginx_default_hsts_max_age" -gt 0 ]; then
@@ -46,8 +51,6 @@ server {
       echo "includeSubDomains\" always;"
     fi
   )
-
-  root /var/www/default/htdocs;
 
   location / {
     $(
