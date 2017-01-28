@@ -4,8 +4,9 @@
   -- add
     1. create no-https config (501 except for acme)
     2. restart nginx? or can it load w/out restart?
+       /usr/sbin/nginx -s reload
     3. letsencrypt
-    4. new config w/ https
+    4. write new config w/ https
     5. re-start/reload
   -- delete
     1. delete
