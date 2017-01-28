@@ -58,7 +58,7 @@ server {
         echo "return 301 $nginx_default_redirect;"
       elif [ -n "$nginx_default_proxy" ]; then
         echo "proxy_pass $nginx_default_proxy;"
-        echo "proxy_redirect default;"
+        echo "include snippets/proxy;"
       fi
     )
   }
