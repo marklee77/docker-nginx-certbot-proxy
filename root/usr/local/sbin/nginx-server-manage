@@ -4,24 +4,61 @@ from mako.lookup import TemplateLookup
 
 import argparse
 import os
+import shutil
+import subprocess
 
-def create(http_config_dir=None, https_config_dir=None, template_dir=None,
-           **kwargs):
+def update(http_config_dir=None, https_config_dir=None, template_dir=None,
+           certbot_webroot_dir=None, **kwargs):
 
     server_name = kwargs['server_name']
+
+    os.makedirs(os.path.join(certbot_webroot_dir, server_name), 0755)
 
     lookup = TemplateLookup(directories=template_dir)
     http_server_template = lookup.get_template('http-server.mako')
     https_server_template = lookup.get_template('https-server.mako')
 
-    print template.render(**kwargs)
+    http_server_file = open(os.path.join(http_config_dir, server_name), "w")
+    http_server_file.write(http_server_template.render(**kwargs))
+    http_server_file.close()
+
+    subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
+
+    return
+
+    https_server_file = open(os.path.join(https_config_dir, server_name), "w")
+    https_server_file.write(https_server_template.render(**kwargs))
+    https_server_file.close()
+
+    subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
+
 
 def delete(server_name=None, http_config_dir=None, https_config_dir=None,
-           **kwargs):
-    pass
+           certbot_webroot_dir=None, **kwargs):
 
-def list(https_config_dir=None, **kwargs):
-    pass
+    try:
+        os.remove(os.path.join(http_config_dir, server_name))
+    except:
+        pass
+
+    try:
+        os.remove(os.path.join(https_config_dir, server_name))
+    except:
+        pass
+
+    try:
+        shutil.rmtree(os.path.join(certbot_webroot_dir, server_name))
+    except:
+        pass
+
+
+def list(http_config_dir=None, https_config_dir=None, **kwargs):
+    http_servers = os.listdir(http_config_dir)
+    https_servers = os.listdir(https_config_dir)
+    servers = [x for x in set(http_servers) | set(https_servers)]
+    for server in servers:
+        print server
+
 
 def main():
     parser = argparse.ArgumentParser(description="manage nginx servers")
@@ -39,11 +76,16 @@ def main():
         default="/usr/local/share/nginx-server-manage/templates",
         metavar="DIR",
         help="directory for server configuration templates")
+    parser.add_argument("--certbot-webroot-dir",
+        default="/var/lib/certbot-webroot", metavar="DIR",
+        help="directory for certbot webroots")
 
-    create_subparser = subparsers.add_parser("create",
-        help="create new server")
+    create_subparser = subparsers.add_parser("update",
+        help="update server")
     create_subparser.add_argument("-s", "--server-name",
         required=True, metavar="FQDN", help="server name as fqdn")
+    create_subparser.add_argument("-x", "--default",
+        action="store_true", help="set default_server")
     create_subparser.add_argument("-e", "--email",
         help="contact email (webmaster at domain if not given)")
     create_subparser.add_argument("-a", "--agree-letsencrypt-tos",
@@ -60,7 +102,7 @@ def main():
         metavar="DIR", help="server root directory")
 
     delete_subparser = subparsers.add_parser(
-        "delete", help="delete existing server")
+        "delete", help="delete server")
     delete_subparser.add_argument("-s", "--server-name",
         required=True, metavar="FQDN", help="server name as fqdn")
 

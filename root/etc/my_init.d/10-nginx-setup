@@ -1,66 +1,18 @@
 #!/bin/sh
 
-: ${nginx_default_hsts_max_age:=0}
+# set secure umask
+umask 0227
 
-mkdir -m 0755 -p /run/nginx
+mkdir -p /run/nginx
 chown -R nginx:nginx /run/nginx
 
-if ! [ -f /etc/ssl/nginx/dh4096.pem ]; then
-    openssl dhparam -out /etc/ssl/nginx/dh4096.pem 4096
+if ! [ -f /etc/ssl/private/dh4096.pem ]; then
+    openssl dhparam -out /etc/ssl/private/dh4096.pem 4096
 fi
 
+# set normal umask
 umask 0022
 
 cat > /etc/nginx/snippets/resolver <<EOF
 resolver $(sed -n '/^nameserver /s///p' /etc/resolv.conf);
-EOF
-
-mkdir -p /var/www/$nginx_default_server_name/htdocs
-
-cat > /etc/nginx/sites/$nginx_default_server_name <<EOF
-server {
-  listen 80 default_server;
-  listen [::]:80 default_server;
-  server_name $nginx_default_server_name;
-
-  include snippets/headers;
-
-  location /.well-known {
-    root /var/www/$nginx_default_server_name/htdocs;
-  }
-
-  location / {
-    return 301 https://\$server_name\$request_uri;
-  }
-}
-
-server {
-  listen 443 ssl http2;
-  listen [::]:443 ssl http2;
-  server_name $nginx_default_server_name;
-
-  ssl_certificate /etc/letsencrypt/live/$nginx_default_server_name/fullchain.pem;
-  ssl_certificate_key /etc/letsencrypt/live/$nginx_default_server_name/privkey.pem;
-
-  include snippets/headers;
-
-  $(
-    if [ "$nginx_default_hsts_max_age" -gt 0 ]; then
-      echo -n "add_header Strict-Transport-Security \""
-      echo -n "max-age=$nginx_default_hsts_max_age; "
-      echo "includeSubDomains\" always;"
-    fi
-  )
-
-  location / {
-    $(
-      if [ -n "$nginx_default_redirect" ]; then
-        echo "return 301 $nginx_default_redirect;"
-      elif [ -n "$nginx_default_proxy" ]; then
-        echo "proxy_pass $nginx_default_proxy;"
-        echo "include snippets/proxy;"
-      fi
-    )
-  }
-}
 EOF
