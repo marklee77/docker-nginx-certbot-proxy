@@ -6,7 +6,7 @@ server {
   include snippets/headers;
 
   location /.well-known {
-    root /var/lib/certbot-webroot/${server_name};
+    root ${webroot_path};
   }
 
   location / {

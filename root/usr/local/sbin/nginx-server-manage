@@ -7,28 +7,36 @@ import os
 import shutil
 import subprocess
 
-def update(http_config_dir=None, https_config_dir=None, template_dir=None,
-           certbot_webroot_dir=None, **kwargs):
+def update(**kwargs):
 
     server_name = kwargs['server_name']
+    webroot_path = os.path.join(kwargs['certbot_webroot_dir'], server_name)
+    http_config_dir = kwargs['http_config_dir']
+    https_config_dir = kwargs['https_config_dir']
 
-    os.makedirs(os.path.join(certbot_webroot_dir, server_name), 0755)
+    kwargs['webroot_path'] = webroot_path
 
-    lookup = TemplateLookup(directories=template_dir)
+    os.makedirs(webroot_path, 0755)
+
+    lookup = TemplateLookup(directories=kwargs['template_dir'])
     http_server_template = lookup.get_template('http-server.mako')
     https_server_template = lookup.get_template('https-server.mako')
 
-    http_server_file = open(os.path.join(http_config_dir, server_name), "w")
-    http_server_file.write(http_server_template.render(**kwargs))
-    http_server_file.close()
+    http_file = open(os.path.join(http_config_dir, server_name), "w")
+    http_file.write(http_server_template.render(**kwargs))
+    http_file.close()
 
     subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
 
-    return
+    certbot_cmd = ["/usr/bin/certbot", "certonly", "--webroot",
+                   "--email", email, "--rsa-key-size", rsa_key_size,
+                   "--domain", server_name, "--webroot-path", webroot_path]
+    certbot_cmd += ["--agree-tos"] if agree_letsencrypt_tos else []
+    subprocess.call(certbot_cmd)
 
-    https_server_file = open(os.path.join(https_config_dir, server_name), "w")
-    https_server_file.write(https_server_template.render(**kwargs))
-    https_server_file.close()
+    https_file = open(os.path.join(https_config_dir, server_name), "w")
+    https_file.write(https_server_template.render(**kwargs))
+    https_file.close()
 
     subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
 
@@ -80,25 +88,25 @@ def main():
         default="/var/lib/certbot-webroot", metavar="DIR",
         help="directory for certbot webroots")
 
-    create_subparser = subparsers.add_parser("update",
+    update_subparser = subparsers.add_parser("update",
         help="update server")
-    create_subparser.add_argument("-s", "--server-name",
+    update_subparser.add_argument("-s", "--server-name",
         required=True, metavar="FQDN", help="server name as fqdn")
-    create_subparser.add_argument("-x", "--default",
+    update_subparser.add_argument("-x", "--default",
         action="store_true", help="set default_server")
-    create_subparser.add_argument("-e", "--email",
+    update_subparser.add_argument("-e", "--email",
         help="contact email (webmaster at domain if not given)")
-    create_subparser.add_argument("-a", "--agree-letsencrypt-tos",
+    update_subparser.add_argument("-a", "--agree-letsencrypt-tos",
         action="store_true", help="pass --agree-tos to letsencrypt")
-    create_subparser.add_argument("-k", "--rsa-key-size",
+    update_subparser.add_argument("-k", "--rsa-key-size",
         type=int, default=2048, metavar="SIZE", help="RSA key size")
-    create_group = create_subparser.add_mutually_exclusive_group()
-    create_group.required = True
-    create_group.add_argument("-r", "--redirect",
+    update_group = create_subparser.add_mutually_exclusive_group()
+    update_group.required = True
+    update_group.add_argument("-r", "--redirect",
         metavar="URL", help="URL for 301 redirect")
-    create_group.add_argument("-p", "--proxy",
+    update_group.add_argument("-p", "--proxy",
         metavar="URL", help="URL for nginx proxy pass")
-    create_group.add_argument("-d", "--directory",
+    update_group.add_argument("-d", "--directory",
         metavar="DIR", help="server root directory")
 
     delete_subparser = subparsers.add_parser(
