@@ -3,8 +3,8 @@ server {
   listen [::]:443 ssl http2;
   server_name ${server_name};
 
-  ssl_certificate /etc/letsencrypt/live/${server_name}/fullchain.pem
-  ssl_certificate_key /etc/letsencrypt/live/${server_name}/privkey.pem
+  ssl_certificate /etc/letsencrypt/live/${server_name}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/${server_name}/privkey.pem;
 
   include snippets/headers;
 

@@ -9,8 +9,12 @@ import subprocess
 
 def update(**kwargs):
 
+    email = kwargs['email']
+    rsa_key_size = kwargs['rsa_key_size']
     server_name = kwargs['server_name']
     webroot_path = os.path.join(kwargs['certbot_webroot_dir'], server_name)
+    agree_letsencrypt_tos = kwargs['agree_letsencrypt_tos']
+
     http_config_dir = kwargs['http_config_dir']
     https_config_dir = kwargs['https_config_dir']
 
@@ -29,7 +33,7 @@ def update(**kwargs):
     subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
 
     certbot_cmd = ["/usr/bin/certbot", "certonly", "--webroot",
-                   "--email", email, "--rsa-key-size", rsa_key_size,
+                   "--email", email, "--rsa-key-size", str(rsa_key_size),
                    "--domain", server_name, "--webroot-path", webroot_path]
     certbot_cmd += ["--agree-tos"] if agree_letsencrypt_tos else []
     subprocess.call(certbot_cmd)
@@ -100,7 +104,9 @@ def main():
         action="store_true", help="pass --agree-tos to letsencrypt")
     update_subparser.add_argument("-k", "--rsa-key-size",
         type=int, default=2048, metavar="SIZE", help="RSA key size")
-    update_group = create_subparser.add_mutually_exclusive_group()
+    update_subparser.add_argument("-m", "--hsts-max-age",
+        type=int, default=0, metavar="MAXAGE", help="HSTS Max Age")
+    update_group = update_subparser.add_mutually_exclusive_group()
     update_group.required = True
     update_group.add_argument("-r", "--redirect",
         metavar="URL", help="URL for 301 redirect")
