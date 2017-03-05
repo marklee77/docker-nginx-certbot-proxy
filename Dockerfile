@@ -29,10 +29,10 @@ RUN chmod 0755 /etc/my_init.d/10-nginx-setup
 COPY root/usr/local/sbin/nginx-server-manage /usr/local/sbin/
 RUN chmod 0755 /usr/local/sbin/nginx-server-manage
 
-COPY root/usr/local/share/nginx-server-manage/* \
-     /usr/local/share/nginx-server-manage/
-RUN chmod 0755 /usr/local/share/nginx-server-manage && \
-    chmod 0644 /usr/local/share/nginx-server-manage/*
+COPY root/usr/local/share/nginx-server-manage/templates \
+     /usr/local/share/nginx-server-manage/templates
+RUN find /usr/local/share/nginx-server-manage -type d | xargs chmod 0755 && \
+    find /usr/local/share/nginx-server-manage -type f | xargs chmod 0644
 
 RUN mkdir -p -m 0755 /var/lib/certbot-webroot
 
