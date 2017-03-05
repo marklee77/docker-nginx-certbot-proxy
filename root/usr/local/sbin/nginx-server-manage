@@ -20,7 +20,8 @@ def update(**kwargs):
 
     kwargs['webroot_path'] = webroot_path
 
-    os.makedirs(webroot_path, 0755)
+    if not os.path.isdir(webroot_path):
+        os.makedirs(webroot_path, 0755)
 
     lookup = TemplateLookup(directories=kwargs['template_dir'])
     http_server_template = lookup.get_template('http-server.mako')
