@@ -26,6 +26,14 @@ RUN chmod 0644 /etc/nginx/snippets/*
 COPY root/etc/my_init.d/10-nginx-setup /etc/my_init.d/
 RUN chmod 0755 /etc/my_init.d/10-nginx-setup
 
+COPY root/usr/local/sbin/nginx-server-manage /usr/local/sbin/
+RUN chmod 0755 /usr/local/sbin/nginx-server-manage
+
+COPY root/usr/local/share/nginx-server-manage/* \
+     /usr/local/share/nginx-server-manage/
+RUN chmod 0755 /usr/local/share/nginx-server-manage && \
+    chmod 0644 /usr/local/share/nginx-server-manage/*
+
 RUN mkdir -p -m 0755 /var/lib/certbot-webroot
 
 VOLUME ["/etc/letsencrypt", "/var/log/nginx", "/var/www"]
