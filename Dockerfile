@@ -34,6 +34,9 @@ COPY root/usr/local/share/nginx-server-manage/templates \
 RUN find /usr/local/share/nginx-server-manage -type d | xargs chmod 0755 && \
     find /usr/local/share/nginx-server-manage -type f | xargs chmod 0644
 
+COPY root/etc/periodic/daily/certbot-renew /etc/periodic/daily/
+RUN chmod 0755 /etc/periodic/daily/certbot-renew
+
 RUN mkdir -p -m 0755 /var/lib/certbot-webroot
 
 VOLUME ["/etc/letsencrypt", "/var/log/nginx", "/var/www"]
