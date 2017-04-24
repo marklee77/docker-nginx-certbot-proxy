@@ -33,9 +33,10 @@ def update(**kwargs):
 
     subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
 
-    certbot_cmd = ["/usr/bin/certbot", "certonly", "--webroot",
-                   "--email", email, "--rsa-key-size", str(rsa_key_size),
-                   "--domain", server_name, "--webroot-path", webroot_path]
+    certbot_cmd = ["/usr/bin/certbot", "certonly", "--non-interactive",
+                   "--webroot", "--webroot-path", webroot_path,
+                   "--email", email, "--domain", server_name,
+                   "--rsa-key-size", str(rsa_key_size)]
     certbot_cmd += ["--agree-tos"] if agree_letsencrypt_tos else []
     subprocess.call(certbot_cmd)
 
