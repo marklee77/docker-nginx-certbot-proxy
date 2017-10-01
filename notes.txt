@@ -1,4 +1,3 @@
-- doubled log entries? prob shouldn't submit to syslog by default?
 - rename to remove -proxy?
 - support for automated setup
 - need volume for dhparam and proper permissions
