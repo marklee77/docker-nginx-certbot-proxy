@@ -14,13 +14,15 @@ RUN apk add --update-cache --no-cache \
         /etc/nginx/modules \
         /var/cache/apk/* \
         /var/cache/nginx/* \
+        /var/log/letsencrypt \
         /var/log/nginx \
         /var/www
 
 RUN mkdir -m 0755 -p /etc/ssl/nginx && \
     ln -s /data/nginx/ssl/dh4096.pem /etc/ssl/nginx/dh4096.pem
 
-RUN ln -s /data/certbot/letsencrypt /etc/letsencrypt && \
+RUN ln -s /data/certbot/config.d /etc/letsencrypt && \
+    ln -s /data/certbot/log /var/log/letsencrypt && \
     ln -s /data/certbot/webroot /var/lib/certbot-webroot
 
 RUN mkdir -m 0755 -p /etc/nginx/snippets
