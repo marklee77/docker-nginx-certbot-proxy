@@ -1,18 +1,30 @@
 #!/bin/sh
 
+: ${nginx_certbot_proxy_resolvers:="$(awk '$1 == "nameserver" { print $2 }' ORS=' ' /etc/resolv.conf)"}
+
+for config_dir in /etc/letsencrypt /etc/nginx/http-configs \
+                  /etc/nginx/https-configs /etc/nginx/snippets /etc/ssl/nginx \
+                  /var/lib/certbot-webroot /var/log/nginx /var/www; do
+    [ -L "$config_dir" ] && config_dir="$(readlink "$config_dir")"
+    [ -d "$config_dir" ] || mkdir -m 0755 -p "$config_dir"
+done
+
 # set secure umask
-umask 0227
+umask 0277
 
-mkdir -p /run/nginx
-chown -R nginx:nginx /run/nginx
-
-if ! [ -f /etc/ssl/private/dh4096.pem ]; then
-    openssl dhparam -out /etc/ssl/private/dh4096.pem 4096
-fi
+config_file=/etc/ssl/nginx/dh4096.pem
+[ -L "$config_file" ] && config_file="$(readlink "$config_file")"
+config_dir="$(dirname "$config_file")"
+[ -d "$config_dir" ] || mkdir -m 0755 -p "$config_dir"
+[ -f "$config_file" ] || openssl dhparam -out "$config_file" 4096
 
 # set normal umask
 umask 0022
 
-cat > /etc/nginx/snippets/resolver <<EOF
-resolver $(sed -n '/^nameserver /s///p' /etc/resolv.conf);
+config_file=/etc/nginx/snippets/resolvers
+[ -L "$config_file" ] && config_file="$(readlink "$config_file")"
+config_dir="$(dirname "$config_file")"
+[ -d "$config_dir" ] || mkdir -m 0755 -p "$config_dir"
+[ -f "$config_file" ] || cat > "$config_file" <<EOF
+resolver $nginx_certbot_proxy_resolvers;
 EOF

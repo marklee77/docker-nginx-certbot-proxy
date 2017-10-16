@@ -81,10 +81,10 @@ def main():
     subparsers.required = True
     subparsers.dest = 'command'
     parser.add_argument("--http-config-dir",
-        default="/etc/nginx/http-servers", metavar="DIR",
+        default="/etc/nginx/http-configs", metavar="DIR",
         help="directory for http server configuration files")
     parser.add_argument("--https-config-dir",
-        default="/etc/nginx/https-servers", metavar="DIR",
+        default="/etc/nginx/https-configs", metavar="DIR",
         help="directory for https server configuration files")
     parser.add_argument("--template-dir",
         default="/usr/local/share/nginx-server-manage/templates",
