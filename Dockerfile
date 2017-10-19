@@ -18,8 +18,9 @@ RUN apk add --update-cache --no-cache \
         /var/log/nginx \
         /var/www
 
-RUN mkdir -m 0755 -p /etc/ssl/nginx && \
-    ln -s /data/nginx/ssl/dh4096.pem /etc/ssl/nginx/dh4096.pem
+RUN mkdir -m 0755 -p /etc/ssl/dhparam
+COPY root/etc/ssl/dhparam/ffdhe4096.pem /etc/ssl/dhparam/
+RUN chmod 0444 /etc/ssl/dhparam/ffdhe4096.pem
 
 RUN ln -s /data/certbot/config.d /etc/letsencrypt && \
     ln -s /data/certbot/log /var/log/letsencrypt && \

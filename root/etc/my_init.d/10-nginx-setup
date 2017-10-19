@@ -9,15 +9,6 @@ for config_dir in /etc/letsencrypt /etc/nginx/http-configs /etc/nginx/https-conf
     [ -d "$config_dir" ] || mkdir -m 0755 -p "$config_dir"
 done
 
-# set secure umask
-umask 0277
-
-config_file=/etc/ssl/nginx/dh4096.pem
-[ -L "$config_file" ] && config_file="$(readlink "$config_file")"
-config_dir="$(dirname "$config_file")"
-[ -d "$config_dir" ] || mkdir -m 0755 -p "$config_dir"
-[ -f "$config_file" ] || openssl dhparam -out "$config_file" 4096
-
 # set normal umask
 umask 0022
 
