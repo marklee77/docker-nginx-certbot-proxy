@@ -1,3 +1,2 @@
 - support custom error pages mount
-- support hsts / preload and hpkp
-- https://blog.qualys.com/ssllabs/2017/03/13/caa-mandated-by-cabrowser-forum
+- logs to syslog or stderr/stdout?
