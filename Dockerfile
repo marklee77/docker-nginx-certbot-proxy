@@ -13,7 +13,6 @@ RUN apk add --update-cache --no-cache \
         /etc/nginx/conf.d \
         /etc/nginx/modules \
         /var/cache/apk/* \
-        /var/cache/nginx/* \
         /var/log/letsencrypt \
         /var/log/nginx \
         /var/www
@@ -21,6 +20,9 @@ RUN apk add --update-cache --no-cache \
 RUN mkdir -m 0755 -p /etc/ssl/dhparam
 COPY root/etc/ssl/dhparam/ffdhe4096.pem /etc/ssl/dhparam/
 RUN chmod 0444 /etc/ssl/dhparam/ffdhe4096.pem
+
+RUN mkdir -m 0770 -p /var/cache/nginx
+RUN chown nginx:nginx /var/cache/nginx
 
 RUN ln -s /data/certbot/config.d /etc/letsencrypt && \
     ln -s /data/certbot/log /var/log/letsencrypt && \
