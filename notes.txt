@@ -1,2 +1,9 @@
 - support custom error pages mount
 - logs to syslog or stderr/stdout?
+
+docker service create --name nginx-certbot-proxy \
+    --network dss-internal --network ingress \
+    --publish 80:80 --publish 443:443 \
+    --mount type=volume,source=nginx-certbot-proxy,target=/data \
+    --detach=false \
+    marklee77/nginx-certbot-proxy:latest
