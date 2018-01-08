@@ -95,7 +95,7 @@ def main():
         required=True, metavar="EMAIL",
         help="contact email (webmaster at domain if not given)")
     update_subparser.add_argument("-a", "--agree-letsencrypt-tos",
-        action="store_true", help="pass --agree-letsencrypt_tos to letsencrypt")
+        action="store_true", help="pass --agree-tos to letsencrypt")
     update_subparser.add_argument("-k", "--rsa-key-size",
         type=int, default=2048, metavar="SIZE", help="RSA key size")
     update_subparser.add_argument("-m", "--hsts-max-age",
