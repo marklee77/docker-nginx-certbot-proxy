@@ -6,6 +6,7 @@ RUN apk add --update-cache --no-cache \
         certbot \
         nginx \
         openssl \
+        py2-future \
         py2-mako && \
     rm -rf \
         /etc/nginx/*.conf \
@@ -13,7 +14,7 @@ RUN apk add --update-cache --no-cache \
         /etc/nginx/conf.d \
         /etc/nginx/modules \
         /var/cache/apk/* \
-        /var/log/letsencrypt \
+        /var/log/letsencrypt/* \
         /var/log/nginx/* \
         /var/www/* && \
     ln -s /dev/stdout /var/log/nginx/error.log && \
