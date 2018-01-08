@@ -1,12 +1,12 @@
 FROM marklee77/supervisor:alpine
-MAINTAINER Mark Stillwell <mark@stillwell.me>
+LABEL maintainer="Mark Stillwell <mark@stillwell.me>"
 
 RUN apk add --update-cache --no-cache \
         ca-certificates \
         certbot \
         nginx \
         openssl \
-        py-mako && \
+        py2-mako && \
     rm -rf \
         /etc/nginx/*.conf \
         /etc/nginx/*_params \
@@ -14,36 +14,24 @@ RUN apk add --update-cache --no-cache \
         /etc/nginx/modules \
         /var/cache/apk/* \
         /var/log/letsencrypt \
-        /var/log/nginx \
-        /var/www
+        /var/log/nginx/* \
+        /var/www/* && \
+    ln -s /dev/stdout /var/log/nginx/error.log && \
+    mkdir -m 0755 -p /etc/nginx/servers && \
+    mkdir -m 0770 -p /var/cache/nginx && \
+    chown nginx:nginx /var/cache/nginx && \
+    mkdir -m 0755 -p /var/www/certbot
 
-RUN mkdir -m 0755 -p /etc/ssl/dhparam
 COPY root/etc/ssl/dhparam/ffdhe4096.pem /etc/ssl/dhparam/
 RUN chmod 0444 /etc/ssl/dhparam/ffdhe4096.pem
 
-RUN mkdir -m 0770 -p /var/cache/nginx
-RUN chown nginx:nginx /var/cache/nginx
-
-RUN ln -s /data/certbot/config.d /etc/letsencrypt && \
-    ln -s /data/certbot/log /var/log/letsencrypt && \
-    ln -s /data/certbot/webroot /var/lib/certbot-webroot
-
-RUN mkdir -m 0755 -p /etc/nginx/snippets
-
-COPY root/etc/nginx/nginx.conf /etc/nginx/
-RUN chmod 0644 /etc/nginx/nginx.conf
 COPY root/etc/nginx/snippets/* /etc/nginx/snippets/
 RUN chmod 0644 /etc/nginx/snippets/*
-
-RUN ln -s /data/nginx/config.d/http-configs /etc/nginx/http-configs && \
-    ln -s /data/nginx/config.d/https-configs /etc/nginx/https-configs && \
-    ln -s /data/nginx/config.d/snippets/resolvers /etc/nginx/snippets/resolvers && \
-    ln -s /data/nginx/log /var/log/nginx && \
-    ln -s /data/nginx/www /var/www
 
 COPY root/usr/local/share/nginx-server-manage/templates/* \
          /usr/local/share/nginx-server-manage/templates/
 RUN chmod -R u=rwX,g=rX,o=rX /usr/local/share/nginx-server-manage
+
 COPY root/usr/local/sbin/nginx-server-manage /usr/local/sbin/
 RUN chmod 0755 /usr/local/sbin/nginx-server-manage
 
@@ -57,3 +45,5 @@ COPY root/etc/supervisor/conf.d/nginx.conf /etc/supervisor/conf.d/
 RUN chmod 0644 /etc/supervisor/conf.d/nginx.conf
 
 EXPOSE 80 443
+
+VOLUME ["/etc/letsencrypt"]

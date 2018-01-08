@@ -13,10 +13,10 @@ def update(**kwargs):
     rsa_key_size = kwargs['rsa_key_size']
     server_name = kwargs['server_name']
     webroot_path = os.path.join(kwargs['certbot_webroot_dir'], server_name)
+    no_ssl = kwargs['no_ssl']
     agree_letsencrypt_tos = kwargs['agree_letsencrypt_tos']
 
-    http_config_dir = kwargs['http_config_dir']
-    https_config_dir = kwargs['https_config_dir']
+    server_config_dir = kwargs['server_config_dir']
 
     kwargs['webroot_path'] = webroot_path
 
@@ -27,11 +27,14 @@ def update(**kwargs):
     http_server_template = lookup.get_template('http-server.mako')
     https_server_template = lookup.get_template('https-server.mako')
 
-    http_file = open(os.path.join(http_config_dir, server_name), "w")
-    http_file.write(http_server_template.render(**kwargs))
-    http_file.close()
+    config_file = open(os.path.join(server_config_dir, server_name), "w")
+    config_file.write(http_server_template.render(**kwargs))
+    config_file.close()
 
     subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
+
+    if no_ssl:
+        return
 
     certbot_cmd = ["/usr/bin/certbot", "certonly", "--non-interactive",
                    "--webroot", "--webroot-path", webroot_path,
@@ -40,23 +43,20 @@ def update(**kwargs):
     certbot_cmd += ["--agree-tos"] if agree_letsencrypt_tos else []
     subprocess.call(certbot_cmd)
 
-    https_file = open(os.path.join(https_config_dir, server_name), "w")
-    https_file.write(https_server_template.render(**kwargs))
-    https_file.close()
+    config_file = open(os.path.join(server_config_dir, server_name), "w")
+    config_file.write(http_server_template.render(**kwargs))
+    config_file.write('\n')
+    config_file.write(https_server_template.render(**kwargs))
+    config_file.close()
 
     subprocess.call(["/usr/sbin/nginx", "-s", "reload"])
 
 
-def delete(server_name=None, http_config_dir=None, https_config_dir=None,
+def delete(server_name=None, server_config_dir=None,
            certbot_webroot_dir=None, **kwargs):
 
     try:
-        os.remove(os.path.join(http_config_dir, server_name))
-    except:
-        pass
-
-    try:
-        os.remove(os.path.join(https_config_dir, server_name))
+        os.remove(os.path.join(server_config_dir, server_name))
     except:
         pass
 
@@ -66,10 +66,8 @@ def delete(server_name=None, http_config_dir=None, https_config_dir=None,
         pass
 
 
-def list(http_config_dir=None, https_config_dir=None, **kwargs):
-    http_servers = os.listdir(http_config_dir)
-    https_servers = os.listdir(https_config_dir)
-    servers = [x for x in set(http_servers) | set(https_servers)]
+def list(server_config_dir=None, **kwargs):
+    servers = os.listdir(server_config_dir)
     for server in servers:
         print server
 
@@ -80,18 +78,15 @@ def main():
     subparsers = parser.add_subparsers()
     subparsers.required = True
     subparsers.dest = 'command'
-    parser.add_argument("--http-config-dir",
-        default="/etc/nginx/http-configs", metavar="DIR",
-        help="directory for http server configuration files")
-    parser.add_argument("--https-config-dir",
-        default="/etc/nginx/https-configs", metavar="DIR",
-        help="directory for https server configuration files")
+    parser.add_argument("--server-config-dir",
+        default="/etc/nginx/servers", metavar="DIR",
+        help="directory for server configuration files")
     parser.add_argument("--template-dir",
         default="/usr/local/share/nginx-server-manage/templates",
         metavar="DIR",
         help="directory for server configuration templates")
     parser.add_argument("--certbot-webroot-dir",
-        default="/var/lib/certbot-webroot", metavar="DIR",
+        default="/var/www/certbot", metavar="DIR",
         help="directory for certbot webroots")
 
     update_subparser = subparsers.add_parser("update",
@@ -103,7 +98,9 @@ def main():
     update_subparser.add_argument("-e", "--email",
         help="contact email (webmaster at domain if not given)")
     update_subparser.add_argument("-a", "--agree-letsencrypt-tos",
-        action="store_true", help="pass --agree-tos to letsencrypt")
+        action="store_true", help="pass --agree-letsencrypt_tos to letsencrypt")
+    update_subparser.add_argument("-n", "--no-ssl",
+        action="store_true", help="pass --no-ssl to disable ssl")
     update_subparser.add_argument("-k", "--rsa-key-size",
         type=int, default=2048, metavar="SIZE", help="RSA key size")
     update_subparser.add_argument("-m", "--hsts-max-age",
