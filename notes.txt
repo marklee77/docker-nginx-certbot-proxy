@@ -1,2 +1,4 @@
 - support custom error pages mount
 - sigh, logs will be stored in /var/log/letsencrypt for now...
+- suggestions for alternative clients and hpkp:
+  - https://scotthelme.co.uk/setting-up-le/
